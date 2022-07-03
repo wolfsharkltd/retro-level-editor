@@ -19,3 +19,6 @@ Initially being written to support the creation of levels to be used on a mega d
 ## Target platforms
 
 Targeting Win32 for now; trying to remain open to keeping project cross platform but not testing or supporting any other configurations at this time.
+
+## License
+Retro Level Editor is licensed under the MIT License, see LICENSE for more information.
