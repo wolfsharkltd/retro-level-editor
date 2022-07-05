@@ -8,9 +8,15 @@ project(editor)
 
 # Packages and includes
 find_package(SDL2 REQUIRED)
+#find_package(nlohmann_json 3.2.0 REQUIRED)
+
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories("lib")
 include_directories("lib/imgui")
+include_directories("lib/json/single_include")
+
+include_directories("lib/nativefiledialog/src/include")
+
 
 # Sources
 set(SOURCE_FILES
@@ -30,13 +36,33 @@ set(SOURCE_FILES
         lib/imgui/backends/imgui_impl_sdlrenderer.h
         lib/imgui/backends/imgui_impl_sdl.cpp
         lib/imgui/backends/imgui_impl_sdl.h
-        )
+
+        lib/nativefiledialog/src/nfd_common.c
+        lib/nativefiledialog/src/nfd_win.cpp
+
+        src/model/Map.cpp
+        src/model/Palette.cpp
+        src/ProjectManager.cpp
+        src/model/Project.cpp)
 
 # Executable
 add_executable(editor ${SOURCE_FILES})
 
+if(WIN32 AND NOT MSVC)
+    set(APPFLAGS "${FLAGS} -municode -mconsole")
+    set(APPFLAGS "${FLAGS} -mconsole --static -static-libgcc -static-libstdc++")
+    set_target_properties(editor PROPERTIES LINK_FLAGS "${APPFLAGS}")
+#    set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)
+#    set(CMAKE_EXE_LINK_DYNAMIC_CXX_FLAGS)
+endif()
+
+# Main headers
+target_include_directories(editor PRIVATE "include")
+
 # Add libs
-target_link_libraries(editor ${SDL2_LIBRARIES})
+target_link_libraries(editor
+        ${SDL2_LIBRARIES}
+        )
 
 # Copy SDL.dll to build output
 if(WIN32)
@@ -47,3 +73,5 @@ if(WIN32)
             COMMAND "${CMAKE_COMMAND}" -E copy "${SDL2_DIR}/bin/SDL2.dll" "$<TARGET_FILE_DIR:editor>/${SDL2_LIBRARY_NAME}"
             )
 endif()
+
+configure_file("project.json" "project.json" COPYONLY)
