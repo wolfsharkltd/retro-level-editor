@@ -10,11 +10,12 @@ Initially being written to support the creation of levels to be used on a mega d
 
 `TBD`
 
-
 ## Libraries
 
 * SDL2 (included)
 * ImGui (included)
+* nativefiledialog (included)
+* imnodes (included)
 
 ## Target platforms
 
