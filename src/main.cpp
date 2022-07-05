@@ -10,6 +10,9 @@
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_sdl.h"
 #include "imgui/backends/imgui_impl_sdlrenderer.h"
+
+#include "imnodes/imnodes.h"
+
 #include <stdio.h>
 #include <SDL.h>
 #include <nfd.h>
@@ -175,6 +178,38 @@ void ProjectWindows()
     }
 }
 
+void NodeWindow()
+{
+    const int hardcoded_node_id = 1;
+    const int hardcoded_node_id2 = 2;
+
+    ImNodes::BeginNodeEditor();
+
+    ImNodes::BeginNode(hardcoded_node_id);
+
+    ImNodes::BeginNodeTitleBar();
+    ImGui::TextUnformatted("output node");
+    ImNodes::EndNodeTitleBar();
+
+    const int output_attr_id = 2;
+    ImNodes::BeginOutputAttribute(output_attr_id);
+// in between Begin|EndAttribute calls, you can call ImGui
+// UI functions
+    ImGui::Text("output pin");
+    ImNodes::EndOutputAttribute();
+
+    ImGui::Dummy(ImVec2(80.0f, 45.0f));
+    ImNodes::EndNode();
+
+    ImNodes::BeginNode(hardcoded_node_id2);
+    ImGui::Dummy(ImVec2(80.0f, 45.0f));
+    ImNodes::EndNode();
+
+    ImNodes::MiniMap();
+    ImNodes::EndNodeEditor();
+}
+
+
 
 
 // Main code
@@ -214,6 +249,8 @@ int main(int, char**) {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImNodes::CreateContext();
+
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -281,6 +318,8 @@ int main(int, char**) {
         MainMenuBar();
         ProjectWindows();
 
+        NodeWindow();
+
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
@@ -329,6 +368,8 @@ int main(int, char**) {
     // Cleanup
     ImGui_ImplSDLRenderer_Shutdown();
     ImGui_ImplSDL2_Shutdown();
+
+    ImNodes::DestroyContext();
     ImGui::DestroyContext();
 
     SDL_DestroyRenderer(renderer);

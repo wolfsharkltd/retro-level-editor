@@ -16,6 +16,7 @@ include_directories("lib/imgui")
 include_directories("lib/json/single_include")
 
 include_directories("lib/nativefiledialog/src/include")
+include_directories("lib/imnodes")
 
 
 # Sources
@@ -39,6 +40,8 @@ set(SOURCE_FILES
 
         lib/nativefiledialog/src/nfd_common.c
         lib/nativefiledialog/src/nfd_win.cpp
+
+        lib/imnodes/imnodes.cpp
 
         src/model/Map.cpp
         src/model/Palette.cpp
