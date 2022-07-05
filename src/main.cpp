@@ -12,14 +12,176 @@
 #include "imgui/backends/imgui_impl_sdlrenderer.h"
 #include <stdio.h>
 #include <SDL.h>
+#include <nfd.h>
 
-#if !SDL_VERSION_ATLEAST(2,0,17)
-#error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
-#endif
+#include "ProjectManager.h"
+
+#include <iostream>
+
+// To get console back on windows
+#undef main
+
+std::shared_ptr<Model::Project> currentProject = ProjectManager::NewProject();
+
+
+void MainMenuBar_OpenFile()
+{
+    nfdchar_t *outPath = NULL;
+    nfdresult_t result = NFD_OpenDialog( NULL, NULL, &outPath );
+
+    if ( result == NFD_OKAY ) {
+        puts("Success!");
+        puts(outPath);
+        free(outPath);
+
+        std::string openFilename = std::string(outPath);
+
+        currentProject = ProjectManager::LoadFromFile(openFilename.c_str());
+    }
+    else if ( result == NFD_CANCEL ) {
+        puts("User pressed cancel.");
+    }
+    else {
+        printf("Error: %s\n", NFD_GetError() );
+    }
+
+}
+
+void MainMenuBar_SaveFile()
+{
+    nfdchar_t *outPath = NULL;
+    nfdresult_t result = NFD_SaveDialog( NULL, NULL, &outPath );
+
+    if ( result == NFD_OKAY ) {
+        puts("Success!");
+        puts(outPath);
+        free(outPath);
+
+        std::string saveFilename = std::string(outPath);
+
+        ProjectManager::SaveToFile(currentProject, saveFilename.c_str());
+    }
+    else if ( result == NFD_CANCEL ) {
+        puts("User pressed cancel.");
+    }
+    else {
+        printf("Error: %s\n", NFD_GetError() );
+    }
+}
+
+bool show_palettes = true;
+
+
+void MainMenuBar()
+{
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("New Project", NULL)) {
+
+                //currentProject = ProjectManager::NewProject();
+
+
+            }
+
+            if(ImGui::MenuItem("Open", NULL)){
+
+                MainMenuBar_OpenFile();
+            }
+            ImGui::Separator();
+            //ImGui::MenuItem("Save", NULL);
+
+            if(ImGui::MenuItem("Save As...", NULL)){
+                MainMenuBar_SaveFile();
+            }
+
+
+            ImGui::Separator();
+            ImGui::MenuItem("Exit", NULL);
+            ImGui::EndMenu();
+        }
+
+        if(ImGui::BeginMenu("Project"))
+        {
+            ImGui::MenuItem("Palettes", NULL, &show_palettes);
+
+            ImGui::EndMenu();
+        }
+
+
+        //if (ImGui::MenuItem("MenuItem")) {} // You can also use MenuItem() inside a menu bar!
+        if (ImGui::BeginMenu("Help"))
+        {
+            ImGui::MenuItem("About", NULL);
+
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+
+}
+
+
+
+void Project_Palettes()
+{
+    static Model::Palette* selectedPalette = NULL;
+
+    ImGui::Begin("Palettes");
+
+    ImGui::Columns(2);
+
+    ImGui::ListBoxHeader("##Palette:");
+    for (auto& palette : currentProject->palettes)
+    {
+        auto isSelected = selectedPalette != NULL && &palette == selectedPalette;
+
+        std::string& item_name = palette.name;
+        if (ImGui::Selectable(item_name.c_str(), isSelected))
+        {
+            selectedPalette = &palette;
+            // handle selection
+        }
+    }
+    ImGui::ListBoxFooter();
+
+    ImGui::NextColumn();
+    if(selectedPalette != NULL) {
+
+        ImGui::Text(selectedPalette->name.c_str());
+
+        for(auto i=0;i<selectedPalette->colours.size();i++){
+
+            ImGui::ColorEdit3((std::string("##color") + std::to_string(i)).c_str(), (float*)&selectedPalette->colours[i].rgb, ImGuiColorEditFlags_DisplayHex);
+
+        }
+
+        if(ImGui::Button("Add")){
+            selectedPalette->colours.push_back(Model::Colour());
+        }
+
+    }
+
+    ImGui::End();
+}
+
+
+
+void ProjectWindows()
+{
+    if(show_palettes){
+        Project_Palettes();
+    }
+}
+
+
 
 // Main code
-int main(int, char**)
-{
+int main(int, char**) {
+
+    std::cout << "Hello world" << std::endl;
+
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to latest version of SDL is recommended!)
@@ -29,9 +191,14 @@ int main(int, char**)
         return -1;
     }
 
+    currentProject = ProjectManager::LoadFromFile("project.json");
+
+
+    //ProjectManager::SaveToFile(project, "project2.json");
+
     // Setup window
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window* window = SDL_CreateWindow("Wolfshark Retro Level Editor", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
 
     // Setup SDL_Renderer instance
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
@@ -55,6 +222,13 @@ int main(int, char**)
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsClassic();
 
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowRounding = 6.0f;
+
+//    style.WindowBorderSize = 2.0f;
+//    style.WindowPadding = ImVec2(4,4);
+//    style.FramePadding = ImVec2(8,8);
+
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer_Init(renderer);
@@ -62,7 +236,7 @@ int main(int, char**)
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
+    // - If the io cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
     // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
@@ -102,6 +276,10 @@ int main(int, char**)
         ImGui_ImplSDLRenderer_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
+
+
+        MainMenuBar();
+        ProjectWindows();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
