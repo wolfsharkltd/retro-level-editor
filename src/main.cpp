@@ -73,7 +73,7 @@ void MainMenuBar_SaveFile()
 }
 
 bool show_palettes = true;
-
+bool show_textures = true;
 
 void MainMenuBar()
 {
@@ -108,6 +108,7 @@ void MainMenuBar()
         if(ImGui::BeginMenu("Project"))
         {
             ImGui::MenuItem("Palettes", NULL, &show_palettes);
+            ImGui::MenuItem("Textures", NULL, &show_textures);
 
             ImGui::EndMenu();
         }
@@ -169,12 +170,51 @@ void Project_Palettes()
     ImGui::End();
 }
 
+void Project_Textures()
+{
+    static Model::Texture* selectedTexture = NULL;
+
+    ImGui::Begin("Textures");
+
+    ImGui::Columns(2);
+
+    ImGui::ListBoxHeader("##Texture:");
+    for (auto& texture : currentProject->textures)
+    {
+        auto isSelected = selectedTexture != NULL && &texture == selectedTexture;
+
+        std::string& item_name = texture.name;
+        if (ImGui::Selectable(item_name.c_str(), isSelected))
+        {
+            selectedTexture = &texture;
+            // handle selection
+        }
+    }
+    ImGui::ListBoxFooter();
+
+    ImGui::NextColumn();
+    if(selectedTexture != NULL) {
+
+        ImGui::Text(selectedTexture->name.c_str());
+
+
+        ImGui::Image(selectedTexture->texture,
+                     ImVec2(selectedTexture->surface->w, selectedTexture->surface->h));
+
+    }
+
+    ImGui::End();
+}
+
 
 
 void ProjectWindows()
 {
     if(show_palettes){
         Project_Palettes();
+    }
+    if(show_textures){
+        Project_Textures();
     }
 }
 
@@ -226,7 +266,7 @@ int main(int, char**) {
         return -1;
     }
 
-    //currentProject = ProjectManager::LoadFromFile("project.json");
+    currentProject = ProjectManager::LoadFromFile("demo-proj/project.json");
 
 
     //ProjectManager::SaveToFile(project, "project2.json");
@@ -269,6 +309,13 @@ int main(int, char**) {
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer_Init(renderer);
+
+
+    for(auto& texture : currentProject->textures)
+    {
+        texture.texture = SDL_CreateTextureFromSurface(renderer, texture.surface);
+    }
+
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.

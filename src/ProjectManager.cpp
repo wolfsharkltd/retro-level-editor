@@ -10,6 +10,8 @@
 
 #include "ProjectManager.h"
 
+#include <SDL_image.h>
+
 std::shared_ptr<Model::Project> ProjectManager::NewProject()
 {
     return std::make_shared<Model::Project>();
@@ -22,6 +24,18 @@ std::shared_ptr<Model::Project> ProjectManager::LoadFromFile(std::string filenam
     nlohmann::json jf = nlohmann::json::parse(ifs);
 
     auto project = jf.get<Model::Project>();
+
+    // Load textures
+    for(auto& texture : project.textures)
+    {
+        // Load from file
+        texture.surface = IMG_Load(texture.filename.c_str());
+
+        if(!texture.surface){
+            printf("IMG_Load: %s\n", IMG_GetError());
+        }
+
+    }
 
     return std::make_shared<Model::Project>(project);
 }

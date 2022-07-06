@@ -17,6 +17,7 @@ find_package(SDL2 REQUIRED)
 #find_package(nlohmann_json 3.2.0 REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIRS})
+include_directories("lib/SDL2_image-2.0.5/include")
 include_directories("lib")
 include_directories("lib/imgui")
 include_directories("lib/json/single_include")
@@ -55,7 +56,7 @@ set(SOURCE_FILES
         src/model/Map.cpp
         src/model/Palette.cpp
         src/ProjectManager.cpp
-        src/model/Project.cpp)
+        src/model/Project.cpp src/model/Texture.cpp include/model/Texture.h)
 
 # Executable
 add_executable(editor ${SOURCE_FILES})
@@ -74,6 +75,7 @@ target_include_directories(editor PRIVATE "include")
 # Add libs
 target_link_libraries(editor
         ${SDL2_LIBRARIES}
+        "${CMAKE_SOURCE_DIR}/lib/SDL2_image-2.0.5/lib/x64/SDL2_image.lib"
         )
 
 # Copy SDL.dll to build output
@@ -85,6 +87,24 @@ if(WIN32)
             #COMMAND "${CMAKE_COMMAND}" -E copy "${SDL2_DIR}/bin/SDL2.dll" "$<TARGET_FILE_DIR:editor>/${SDL2_LIBRARY_NAME}"
             COMMAND "${CMAKE_COMMAND}" -E copy "${SDL2_DIR}/lib/x64/SDL2.dll" "$<TARGET_FILE_DIR:editor>/${SDL2_LIBRARY_NAME}"
             )
+    add_custom_command(TARGET editor POST_BUILD
+            COMMENT "Copying SDL2 DLL"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/lib/SDL2_image-2.0.5/lib/x64/SDL2_image.dll" "$<TARGET_FILE_DIR:editor>/SDL2_image.dll"
+            )
+    add_custom_command(TARGET editor POST_BUILD
+            COMMENT "Copying SDL2 DLL"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/lib/SDL2_image-2.0.5/lib/x64/libpng16-16.dll" "$<TARGET_FILE_DIR:editor>/libpng16-16.dll"
+            )
+    add_custom_command(TARGET editor POST_BUILD
+            COMMENT "Copying SDL2 DLL"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/lib/SDL2_image-2.0.5/lib/x64/zlib1.dll" "$<TARGET_FILE_DIR:editor>/zlib1.dll"
+            )
+
 endif()
 
-configure_file("project.json" "project.json" COPYONLY)
+#configure_file("demo-proj/project.json" "demo-proj/project.json" COPYONLY)
+
+add_custom_command(TARGET editor POST_BUILD
+        COMMENT "Copying Demo Project"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/demo-proj" "${CMAKE_BINARY_DIR}/demo-proj"
+)

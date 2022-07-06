@@ -11,8 +11,9 @@
 namespace Model {
     void to_json(nlohmann::json& j, const Project& p) {
         j = nlohmann::json{
-                {"name", p.name},
-                {"palettes", p.palettes }
+            {"name", p.name},
+            {"palettes", p.palettes },
+            {"textures", p.textures },
         };
     }
 
@@ -22,6 +23,10 @@ namespace Model {
         const nlohmann::json& sj = j.at("palettes");
         p.palettes.resize(sj.size());
         std::copy(sj.begin(), sj.end(), p.palettes.begin());
+
+        const nlohmann::json& jpalettes = j.at("textures");
+        p.textures.resize(jpalettes.size());
+        std::copy(jpalettes.begin(), jpalettes.end(), p.textures.begin());
     }
 }
 

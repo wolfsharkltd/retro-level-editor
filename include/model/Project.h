@@ -9,7 +9,7 @@
 #include "nlohmann/json.hpp"
 
 #include "Palette.h"
-
+#include "Texture.h"
 
 namespace Model {
 
@@ -26,6 +26,7 @@ namespace Model {
     public:
         std::string name;
         std::vector<Model::Palette> palettes;
+        std::vector<Model::Texture> textures;
     };
 
     void to_json(nlohmann::json& j, const Project& p);
