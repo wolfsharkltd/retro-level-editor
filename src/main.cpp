@@ -226,7 +226,7 @@ int main(int, char**) {
         return -1;
     }
 
-    currentProject = ProjectManager::LoadFromFile("project.json");
+    //currentProject = ProjectManager::LoadFromFile("project.json");
 
 
     //ProjectManager::SaveToFile(project, "project2.json");
