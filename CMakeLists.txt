@@ -1,10 +1,16 @@
 cmake_minimum_required(VERSION 3.7)
 
 set(CMAKE_CXX_STANDARD 17)
-set(SDL2_DIR "${CMAKE_SOURCE_DIR}/lib/SDL2-2.0.22/x86_64-w64-mingw32")
+#set(SDL2_DIR "${CMAKE_SOURCE_DIR}/lib/SDL2-2.0.22/x86_64-w64-mingw32")
+set(SDL2_DIR "${CMAKE_SOURCE_DIR}/lib/SDL2-2.0.22")
+
+
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 project(editor)
+
+message("Lib: ${SDL2_DIR}")
 
 # Packages and includes
 find_package(SDL2 REQUIRED)
@@ -17,6 +23,9 @@ include_directories("lib/json/single_include")
 
 include_directories("lib/nativefiledialog/src/include")
 include_directories("lib/imnodes")
+
+message("Lib: ${SDL2_LIBRARY}")
+
 
 
 # Sources
@@ -73,7 +82,8 @@ if(WIN32)
             MAIN_DEPENDENCY "${SDL2_LIBRARY}"
             BYPRODUCTS "${SDL2_LIBRARY_NAME}"
             COMMENT "Copying SDL2 DLL"
-            COMMAND "${CMAKE_COMMAND}" -E copy "${SDL2_DIR}/bin/SDL2.dll" "$<TARGET_FILE_DIR:editor>/${SDL2_LIBRARY_NAME}"
+            #COMMAND "${CMAKE_COMMAND}" -E copy "${SDL2_DIR}/bin/SDL2.dll" "$<TARGET_FILE_DIR:editor>/${SDL2_LIBRARY_NAME}"
+            COMMAND "${CMAKE_COMMAND}" -E copy "${SDL2_DIR}/lib/x64/SDL2.dll" "$<TARGET_FILE_DIR:editor>/${SDL2_LIBRARY_NAME}"
             )
 endif()
 
