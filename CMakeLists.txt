@@ -56,7 +56,7 @@ set(SOURCE_FILES
         src/model/Map.cpp
         src/model/Palette.cpp
         src/ProjectManager.cpp
-        src/model/Project.cpp src/model/Texture.cpp include/model/Texture.h)
+        src/model/Project.cpp src/model/Texture.cpp include/model/Texture.h src/model/MapNode.cpp include/model/MapNode.h src/widgets/MapWindow.cpp include/widgets/MapWindow.h)
 
 # Executable
 add_executable(editor ${SOURCE_FILES})

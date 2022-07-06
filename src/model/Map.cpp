@@ -10,19 +10,22 @@ namespace Model {
 
     }
 
-    int Map::getWidth() const {
-        return m_width;
+    void to_json(nlohmann::json& j, const Map& p) {
+        j = nlohmann::json{
+                {"name", p.name},
+                {"width", p.width},
+            {"height", p.height},
+            {"nodes", p.nodes}
+        };
     }
 
-    void Map::setWidth(int mWidth) {
-        m_width = mWidth;
-    }
+    void from_json(const nlohmann::json& j, Map& p) {
+        j.at("name").get_to(p.name);
+        j.at("width").get_to(p.width);
+        j.at("height").get_to(p.height);
 
-    int Map::getHeight() const {
-        return m_height;
-    }
-
-    void Map::setHeight(int mHeight) {
-        m_height = mHeight;
+        const nlohmann::json& sj = j.at("nodes");
+        p.nodes.resize(sj.size());
+        std::copy(sj.begin(), sj.end(), p.nodes.begin());
     }
 }

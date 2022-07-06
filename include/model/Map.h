@@ -6,25 +6,27 @@
 #define EDITOR_MAP_H
 #include "nlohmann/json.hpp"
 
+#include "MapNode.h"
+
 namespace Model {
 
     class Map {
-    protected:
-        int m_width;
-        int m_height;
+    public:
+        std::string name;
+        int width;
+        int height;
+
+        std::vector<MapNode> nodes;
 
     public:
-        int getWidth() const;
-
-        void setWidth(int mWidth);
-
-        int getHeight() const;
-
-        void setHeight(int mHeight);
 
     public:
         void Test();
     };
+
+    void to_json(nlohmann::json& j, const Map& p);
+    void from_json(const nlohmann::json& j, Map& p);
+
 }
 
 

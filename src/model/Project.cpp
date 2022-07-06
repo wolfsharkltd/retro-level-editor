@@ -14,6 +14,7 @@ namespace Model {
             {"name", p.name},
             {"palettes", p.palettes },
             {"textures", p.textures },
+            {"maps", p.maps },
         };
     }
 
@@ -27,6 +28,11 @@ namespace Model {
         const nlohmann::json& jpalettes = j.at("textures");
         p.textures.resize(jpalettes.size());
         std::copy(jpalettes.begin(), jpalettes.end(), p.textures.begin());
+
+        const nlohmann::json& jmaps = j.at("maps");
+        p.maps.resize(jmaps.size());
+        std::copy(jmaps.begin(), jmaps.end(), p.maps.begin());
+
     }
 }
 

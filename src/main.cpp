@@ -19,6 +19,8 @@
 
 #include "ProjectManager.h"
 
+#include "widgets/MapWindow.h"
+
 #include <iostream>
 
 // To get console back on windows
@@ -257,6 +259,7 @@ int main(int, char**) {
 
     std::cout << "Hello world" << std::endl;
 
+
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to latest version of SDL is recommended!)
@@ -267,6 +270,7 @@ int main(int, char**) {
     }
 
     currentProject = ProjectManager::LoadFromFile("demo-proj/project.json");
+
 
 
     //ProjectManager::SaveToFile(project, "project2.json");
@@ -282,6 +286,10 @@ int main(int, char**) {
         SDL_Log("Error creating SDL_Renderer!");
         return false;
     }
+
+    MapWindow *mapWindow = new MapWindow(renderer, std::make_shared<Model::Map>(currentProject->maps[0]));
+
+
     //SDL_RendererInfo info;
     //SDL_GetRendererInfo(renderer, &info);
     //SDL_Log("Current SDL_Renderer: %s", info.name);
@@ -366,6 +374,8 @@ int main(int, char**) {
         ProjectWindows();
 
         NodeWindow();
+
+        mapWindow->Draw();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
